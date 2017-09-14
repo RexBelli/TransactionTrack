@@ -76,6 +76,21 @@ while day < end:
 			transactions[account_name][m][str(day)] = default
 	day = day + datetime.timedelta(days=1)
 #pp.pprint(transactions)
+#---
+# put transfers into transactions
+for t in d['transfers']:
+	account_from = d['transfers'][t]['from']
+	account_to = d['transfers'][t]['to']
+	date = parser.parse(d['transfers'][t]['date']).date()
+	amount = d['transfers'][t]['amount']
+	
+	transactions[account_from][t] = {}
+	transactions[account_to][t] = {}
+	
+	transactions[account_from][t][str(date)] = amount * -1
+	transactions[account_to][t][str(date)] = amount
+#pp.pprint(transactions)
+
 
 #pp.pprint(d['monthly_overrides']) 
 #---
@@ -151,15 +166,25 @@ for account_name in data:
 		if not dates_full: dates.append(parser.parse(t[0]))
 		values[account_name].append(t[1])
 	dates_full = True
-		
+values['total'] = []
+for i in range(len(dates)):
+	temp_total = 0
+	for account_name in data:
+		temp_total += values[account_name][i]
+	values['total'].append(temp_total)
 #print(dates,values)
+
+
+
 
 fig, ax = plt.subplots()
 
 for account_name in values:
-	print(dates)
-	print(values[account_name])
-	ax.plot(dates,values[account_name])
+	#print(dates)
+	#print(values[account_name])
+	ax.plot(dates,values[account_name], label=account_name)
+
+plt.legend(bbox_to_anchor=(1.05,1), loc=2, borderaxespad=0)
 
 fig.autofmt_xdate()
 myFmt = mdates.DateFormatter('%Y-%m-%d')
